@@ -15,6 +15,12 @@ import { profileService, type Profile } from "../services/profileService";
 import { bookingService, type Booking } from "../services/bookingService";
 
 import { resourceService, type Resource } from "../services/resourceService";
+import { Bell } from "lucide-react";
+
+import {
+  notificationService,
+  type Notification,
+} from "../services/notificationService";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -26,9 +32,28 @@ export default function Dashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [resources, setResources] = useState<Resource[]>([]);
   const [bookingLoading, setBookingLoading] = useState(true);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [notificationLoading, setNotificationLoading] = useState(true);
+  const [notificationError, setNotificationError] = useState("");
 
+  async function loadNotifications() {
+    try {
+      setNotificationLoading(true);
+      setNotificationError("");
+
+      const data = await notificationService.getMyNotifications();
+
+      setNotifications(data);
+    } catch (error) {
+      console.error("Unable to load notifications:", error);
+      setNotificationError("Unable to load notifications.");
+    } finally {
+      setNotificationLoading(false);
+    }
+  }
   useEffect(() => {
     loadBookings();
+    loadNotifications();
   }, []);
   const loadBookings = async () => {
     try {
@@ -221,6 +246,130 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
+        </section>
+
+        <section className="mt-10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Bell className="text-blue-600" size={24} />
+
+              <h3 className="text-xl font-bold text-slate-900">
+                Notifications
+              </h3>
+            </div>
+
+            {notifications.some((notification) => !notification.read) && (
+              <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
+                {
+                  notifications.filter((notification) => !notification.read)
+                    .length
+                }{" "}
+                unread
+              </span>
+            )}
+          </div>
+
+          {notificationError && (
+            <div className="mt-4 rounded-xl bg-red-50 p-4 text-sm text-red-700">
+              {notificationError}
+            </div>
+          )}
+
+          {notificationLoading ? (
+            <div className="mt-4 rounded-2xl bg-white p-6 shadow-sm">
+              <p className="text-sm text-slate-600">Loading notifications...</p>
+            </div>
+          ) : notifications.length === 0 ? (
+            <div className="mt-4 rounded-2xl bg-white p-6 shadow-sm">
+              <p className="font-medium text-slate-900">No notifications</p>
+
+              <p className="mt-1 text-sm text-slate-600">
+                You will see important updates about your bookings here.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-4 space-y-3">
+              {notifications.slice(0, 5).map((notification) => (
+                <div
+                  key={notification.id}
+                  className={`rounded-2xl p-5 shadow-sm ${
+                    notification.read
+                      ? "bg-white"
+                      : "bg-blue-50 ring-1 ring-blue-100"
+                  }`}
+                >
+                  <div className="flex items-start gap-3">
+                    {notification.read ? (
+                      <CheckCircle2
+                        className="mt-0.5 text-slate-400"
+                        size={20}
+                      />
+                    ) : (
+                      <Bell className="mt-0.5 text-blue-600" size={20} />
+                    )}
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+                        <p
+                          className={`text-sm ${
+                            notification.read
+                              ? "text-slate-700"
+                              : "font-semibold text-slate-900"
+                          }`}
+                        >
+                          {notification.message}
+                        </p>
+
+                        {!notification.read && (
+                          <span className="w-fit rounded-full bg-blue-600 px-2 py-1 text-xs font-semibold text-white">
+                            New
+                          </span>
+                        )}
+                      </div>
+
+                      <p className="mt-2 text-xs text-slate-500">
+                        {new Date(notification.created_at).toLocaleString(
+                          "en-ZA",
+                        )}
+                      </p>
+
+                      {!notification.read && (
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            try {
+                              await notificationService.markAsRead(
+                                notification.id,
+                              );
+
+                              setNotifications((current) =>
+                                current.map((item) =>
+                                  item.id === notification.id
+                                    ? {
+                                        ...item,
+                                        read: true,
+                                      }
+                                    : item,
+                                ),
+                              );
+                            } catch (error) {
+                              console.error(
+                                "Unable to mark notification as read:",
+                                error,
+                              );
+                            }
+                          }}
+                          className="mt-3 text-sm font-semibold text-blue-600 hover:text-blue-700"
+                        >
+                          Mark as read
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Booking overview */}
