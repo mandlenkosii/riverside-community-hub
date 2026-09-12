@@ -69,7 +69,7 @@ function App() {
 }
 
 export default App */
-
+/*
 import { useEffect, useState } from "react"
 import { supabase } from "./lib/supabase"
 
@@ -165,4 +165,15 @@ function App() {
   )
 }
 
-export default App
+export default App */
+import { BrowserRouter } from "react-router-dom"
+
+import AppRoutes from "./routes/AppRoutes"
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  )
+}
