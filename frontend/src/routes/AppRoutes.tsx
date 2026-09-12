@@ -6,6 +6,7 @@ import Register from "../pages/Register"
 import Welcome from "../pages/Welcome"
 import ProtectedRoute from "./ProtectedRoute"
 import Profile from "../pages/Profile"
+import Facilities from "../pages/Facilities"
 
 /*function Dashboard() {
   return (
@@ -31,6 +32,8 @@ export default function AppRoutes() {
       <Route path="/register" element={<Register />} />
 
       <Route path="/login" element={<Login />} />
+
+      <Route path="/facilities" element={<Facilities />} />
     
     <Route element={<ProtectedRoute />}>
       <Route path="/dashboard" element={<Dashboard />} />
