@@ -7,6 +7,7 @@ import Welcome from "../pages/Welcome"
 import ProtectedRoute from "./ProtectedRoute"
 import Profile from "../pages/Profile"
 import Facilities from "../pages/Facilities"
+import Programmes from "../pages/Programmes"
 
 /*function Dashboard() {
   return (
@@ -34,7 +35,9 @@ export default function AppRoutes() {
       <Route path="/login" element={<Login />} />
 
       <Route path="/facilities" element={<Facilities />} />
-    
+      
+      <Route path="/programmes" element={<Programmes />} />
+
     <Route element={<ProtectedRoute />}>
       <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/profile" element={<Profile />} />
