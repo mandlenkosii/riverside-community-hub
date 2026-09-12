@@ -1,47 +1,34 @@
 import { Navigate, Route, Routes } from "react-router-dom"
 
 import Dashboard from "../pages/Dashboard"
+import Donations from "../pages/Donations"
+import Facilities from "../pages/Facilities"
 import Login from "../pages/Login"
+import Profile from "../pages/Profile"
+import Programmes from "../pages/Programmes"
 import Register from "../pages/Register"
 import Welcome from "../pages/Welcome"
+
+import PublicLayout from "../layouts/PublicLayout"
 import ProtectedRoute from "./ProtectedRoute"
-import Profile from "../pages/Profile"
-import Facilities from "../pages/Facilities"
-import Programmes from "../pages/Programmes"
-import Donations from "../pages/Donations"
-
-/*function Dashboard() {
-  return (
-    <main className="min-h-screen bg-slate-50 p-8">
-      <div className="mx-auto max-w-7xl">
-        <h1 className="text-3xl font-bold text-slate-900">
-          Member Dashboard
-        </h1>
-
-        <p className="mt-2 text-slate-600">
-          Welcome to your Riverside Community Hub account.
-        </p>
-      </div>
-    </main>
-  )
-} */
 
 export default function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<Welcome />} />
-        
+      <Route element={<PublicLayout />}>
+        <Route path="/" element={<Welcome />} />
+        <Route path="/facilities" element={<Facilities />} />
+        <Route path="/programmes" element={<Programmes />} />
+        <Route path="/donations" element={<Donations />} />
+      </Route>
+
       <Route path="/register" element={<Register />} />
       <Route path="/login" element={<Login />} />
-      <Route path="/facilities" element={<Facilities />} />
-      <Route path="/programmes" element={<Programmes />} />   
-      <Route path="/donations" element={<Donations />} />
 
-
-    <Route element={<ProtectedRoute />}>
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/profile" element={<Profile />} />
-    </Route>
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/profile" element={<Profile />} />
+      </Route>
 
       <Route
         path="*"
