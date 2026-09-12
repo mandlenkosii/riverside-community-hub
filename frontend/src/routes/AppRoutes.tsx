@@ -8,6 +8,7 @@ import Profile from "../pages/Profile"
 import Programmes from "../pages/Programmes"
 import Register from "../pages/Register"
 import Welcome from "../pages/Welcome"
+import Bookings from "../pages/Bookings"
 
 import PublicLayout from "../layouts/PublicLayout"
 import ProtectedRoute from "./ProtectedRoute"
@@ -28,6 +29,7 @@ export default function AppRoutes() {
       <Route element={<ProtectedRoute />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/bookings" element={<Bookings />} />
       </Route>
 
       <Route
