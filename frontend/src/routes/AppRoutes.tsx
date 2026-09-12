@@ -8,6 +8,7 @@ import ProtectedRoute from "./ProtectedRoute"
 import Profile from "../pages/Profile"
 import Facilities from "../pages/Facilities"
 import Programmes from "../pages/Programmes"
+import Donations from "../pages/Donations"
 
 /*function Dashboard() {
   return (
@@ -29,14 +30,13 @@ export default function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<Welcome />} />
-
+        
       <Route path="/register" element={<Register />} />
-
       <Route path="/login" element={<Login />} />
-
       <Route path="/facilities" element={<Facilities />} />
-      
-      <Route path="/programmes" element={<Programmes />} />
+      <Route path="/programmes" element={<Programmes />} />   
+      <Route path="/donations" element={<Donations />} />
+
 
     <Route element={<ProtectedRoute />}>
       <Route path="/dashboard" element={<Dashboard />} />
