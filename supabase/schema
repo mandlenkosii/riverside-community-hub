@@ -1,0 +1,197 @@
+## Table `profiles`
+
+### Columns
+
+| Name                    | Type                | Constraints |
+| ----------------------- | ------------------- | ----------- |
+| `id`                    | `uuid`              | Primary     |
+| `full_name`             | `text`              |             |
+| `email`                 | `text`              | Nullable    |
+| `phone`                 | `text`              | Nullable    |
+| `role`                  | `user_role`         |             |
+| `membership_tier`       | `membership_tier`   |             |
+| `membership_status`     | `membership_status` |             |
+| `joined_at`             | `timestamptz`       |             |
+| `membership_expires_at` | `timestamptz`       | Nullable    |
+| `created_at`            | `timestamptz`       |             |
+| `updated_at`            | `timestamptz`       |             |
+
+## Table `resources`
+
+### Columns
+
+| Name          | Type            | Constraints |
+| ------------- | --------------- | ----------- |
+| `id`          | `uuid`          | Primary     |
+| `name`        | `text`          |             |
+| `type`        | `resource_type` |             |
+| `capacity`    | `int4`          | Nullable    |
+| `description` | `text`          | Nullable    |
+| `available`   | `bool`          |             |
+| `created_at`  | `timestamptz`   |             |
+| `updated_at`  | `timestamptz`   |             |
+
+## Table `bookings`
+
+### Columns
+
+| Name          | Type             | Constraints |
+| ------------- | ---------------- | ----------- |
+| `id`          | `uuid`           | Primary     |
+| `resource_id` | `uuid`           |             |
+| `member_id`   | `uuid`           |             |
+| `start_time`  | `timestamptz`    |             |
+| `end_time`    | `timestamptz`    |             |
+| `status`      | `booking_status` |             |
+| `notes`       | `text`           | Nullable    |
+| `created_at`  | `timestamptz`    |             |
+| `updated_at`  | `timestamptz`    |             |
+
+## Table `campaigns`
+
+### Columns
+
+| Name             | Type          | Constraints |
+| ---------------- | ------------- | ----------- |
+| `id`             | `uuid`        | Primary     |
+| `title`          | `text`        |             |
+| `description`    | `text`        | Nullable    |
+| `goal_amount`    | `numeric`     |             |
+| `current_amount` | `numeric`     |             |
+| `active`         | `bool`        |             |
+| `start_date`     | `date`        | Nullable    |
+| `end_date`       | `date`        | Nullable    |
+| `created_at`     | `timestamptz` |             |
+| `updated_at`     | `timestamptz` |             |
+
+## Table `donations`
+
+### Columns
+
+| Name             | Type            | Constraints |
+| ---------------- | --------------- | ----------- |
+| `id`             | `uuid`          | Primary     |
+| `donor_id`       | `uuid`          | Nullable    |
+| `campaign_id`    | `uuid`          | Nullable    |
+| `donor_name`     | `text`          | Nullable    |
+| `donor_email`    | `text`          | Nullable    |
+| `amount`         | `numeric`       |             |
+| `donation_type`  | `donation_type` |             |
+| `payment_status` | `text`          |             |
+| `created_at`     | `timestamptz`   |             |
+
+## Table `notifications`
+
+### Columns
+
+| Name         | Type                | Constraints |
+| ------------ | ------------------- | ----------- |
+| `id`         | `uuid`              | Primary     |
+| `user_id`    | `uuid`              |             |
+| `message`    | `text`              |             |
+| `type`       | `notification_type` |             |
+| `read`       | `bool`              |             |
+| `created_at` | `timestamptz`       |             |
+
+## Table `programmes`
+
+### Columns
+
+| Name          | Type          | Constraints |
+| ------------- | ------------- | ----------- |
+| `id`          | `uuid`        | Primary     |
+| `title`       | `text`        |             |
+| `description` | `text`        | Nullable    |
+| `category`    | `text`        | Nullable    |
+| `schedule`    | `text`        | Nullable    |
+| `image_url`   | `text`        | Nullable    |
+| `active`      | `bool`        |             |
+| `created_at`  | `timestamptz` |             |
+| `updated_at`  | `timestamptz` |             |
+
+## Custom Types / Enums
+
+### `user_role`
+
+`member` | `staff` | `admin`
+
+### `membership_tier`
+
+`free` | `standard` | `family`
+
+### `membership_status`
+
+`active` | `expiring_soon` | `expired`
+
+### `resource_type`
+
+`room` | `equipment`
+
+### `booking_status`
+
+`pending` | `approved` | `rejected` | `cancelled`
+
+### `donation_type`
+
+`one_off` | `recurring_pledge`
+
+### `notification_type`
+
+`booking` | `membership` | `donation` | `system`
+
+## RLS Policies
+
+### `resources`
+
+| Policy                                | Command | Roles               | Action     | USING                 | WITH CHECK            |
+| ------------------------------------- | ------- | ------------------- | ---------- | --------------------- | --------------------- |
+| `Anyone can view available resources` | SELECT  | anon, authenticated | PERMISSIVE | `(available = true)`  | —                     |
+| `Staff can manage resources`          | ALL     | authenticated       | PERMISSIVE | `is_staff_or_admin()` | `is_staff_or_admin()` |
+
+### `profiles`
+
+| Policy                         | Command | Roles         | Action     | USING                                        | WITH CHECK            |
+| ------------------------------ | ------- | ------------- | ---------- | -------------------------------------------- | --------------------- |
+| `Staff can update profiles`    | UPDATE  | authenticated | PERMISSIVE | `is_staff_or_admin()`                        | `is_staff_or_admin()` |
+| `Users can update own profile` | UPDATE  | authenticated | PERMISSIVE | `(id = auth.uid())`                          | `(id = auth.uid())`   |
+| `Users can view own profile`   | SELECT  | authenticated | PERMISSIVE | `((id = auth.uid()) OR is_staff_or_admin())` | —                     |
+
+### `bookings`
+
+| Policy                            | Command | Roles         | Action     | USING                                               | WITH CHECK                 |
+| --------------------------------- | ------- | ------------- | ---------- | --------------------------------------------------- | -------------------------- |
+| `Members can create own bookings` | INSERT  | authenticated | PERMISSIVE | —                                                   | `(member_id = auth.uid())` |
+| `Members can update own bookings` | UPDATE  | authenticated | PERMISSIVE | `(member_id = auth.uid())`                          | `(member_id = auth.uid())` |
+| `Members can view own bookings`   | SELECT  | authenticated | PERMISSIVE | `((member_id = auth.uid()) OR is_staff_or_admin())` | —                          |
+| `Staff can manage bookings`       | ALL     | authenticated | PERMISSIVE | `is_staff_or_admin()`                               | `is_staff_or_admin()`      |
+
+### `donations`
+
+| Policy                         | Command | Roles               | Action     | USING                                     | WITH CHECK                |
+| ------------------------------ | ------- | ------------------- | ---------- | ----------------------------------------- | ------------------------- |
+| `Admins can update donations`  | UPDATE  | authenticated       | PERMISSIVE | `is_admin()`                              | `is_admin()`              |
+| `Admins can view donations`    | SELECT  | authenticated       | PERMISSIVE | `is_admin()`                              | —                         |
+| `Anyone can create donations`  | INSERT  | anon, authenticated | PERMISSIVE | —                                         | `(amount > (0)::numeric)` |
+| `Users can view own donations` | SELECT  | authenticated       | PERMISSIVE | `((donor_id = auth.uid()) OR is_admin())` | —                         |
+
+### `notifications`
+
+| Policy                               | Command | Roles         | Action     | USING                    | WITH CHECK               |
+| ------------------------------------ | ------- | ------------- | ---------- | ------------------------ | ------------------------ |
+| `Staff can create notifications`     | INSERT  | authenticated | PERMISSIVE | —                        | `is_staff_or_admin()`    |
+| `Users can update own notifications` | UPDATE  | authenticated | PERMISSIVE | `(user_id = auth.uid())` | `(user_id = auth.uid())` |
+| `Users can view own notifications`   | SELECT  | authenticated | PERMISSIVE | `(user_id = auth.uid())` | —                        |
+
+### `programmes`
+
+| Policy                              | Command | Roles               | Action     | USING             | WITH CHECK   |
+| ----------------------------------- | ------- | ------------------- | ---------- | ----------------- | ------------ |
+| `Admins can manage programmes`      | ALL     | authenticated       | PERMISSIVE | `is_admin()`      | `is_admin()` |
+| `Anyone can view active programmes` | SELECT  | anon, authenticated | PERMISSIVE | `(active = true)` | —            |
+
+### `campaigns`
+
+| Policy                             | Command | Roles               | Action     | USING             | WITH CHECK   |
+| ---------------------------------- | ------- | ------------------- | ---------- | ----------------- | ------------ |
+| `Admins can manage campaigns`      | ALL     | authenticated       | PERMISSIVE | `is_admin()`      | `is_admin()` |
+| `Anyone can view active campaigns` | SELECT  | anon, authenticated | PERMISSIVE | `(active = true)` | —            |
