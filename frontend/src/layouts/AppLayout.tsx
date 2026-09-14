@@ -1,0 +1,18 @@
+import { Outlet } from "react-router-dom";
+
+import PublicNavbar from "../components/PublicNavbar";
+import PublicFooter from "../components/PublicFooter";
+
+export default function AppLayout() {
+  return (
+    <div className="flex min-h-screen flex-col bg-slate-50">
+      <PublicNavbar />
+
+      <main className="flex-1">
+        <Outlet />
+      </main>
+
+      <PublicFooter />
+    </div>
+  );
+}
